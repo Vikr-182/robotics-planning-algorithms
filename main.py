@@ -5,8 +5,8 @@ from model import *
 import cvxpy as cp
 
 # Grid setup
-h = 300
-w = 300
+h = 150
+w = 150
 grid = [[0 for i in range(h)] for j in range(w)]
 
 # Goal
@@ -49,6 +49,9 @@ def generate_n_inputs(robot):
     for t in range(T):
         cost += cp.sum_squares(x[:,t+1] - [goal[0], goal[1]]) # +  cp.sum_squares(u[:,t])
         constr += [x[:,t+1] == A@x[:,t] + B@u[:,t], v[:,t+1] == u[:,t], cp.norm(u[:,t], 'inf') <= NORM_MAX]
+        for j in range(len(obs)):
+            constr += [cp.norm(x[:t + 1]  - obs[j])]
+
     # sums problem objectives and concatenates constraints.
     constr += [x[:,0] == robot.get_pos()]
     problem = cp.Problem(cp.Minimize(cost), constr)
@@ -80,8 +83,11 @@ def vis_grid(robot, cnt, his):
         circs = plt.Circle((obs[i][0],obs[i][1]), r[i], color='red')
         ax.add_patch( circs )
 
-    for j in range(len(his) - 1):
-        ax.plot((his[i][0], his[i][1]), (his[i + 1][0], his[i][1]),'b-')
+    for i in range(len(his) - 1):
+        print("AAA")
+        print(his[i])
+        print(his[i + 1])
+        ax.plot([his[i][0], his[i][1]], [his[i + 1][0], his[i + 1][1]],'go--', linewidth=2, markersize=12)
 
     plt.xlim([0, w])
     plt.ylim([0, h])
@@ -99,10 +105,14 @@ def get_distance(x1, x2):
 
 def mpc_loop(robot):
     cnt = 0
+    his = []
     while time.time() - TIME_INIT <= 200:
         if get_distance(robot.get_pos(), goal) < 2:
             print("REACHED GOAL")
             break
+
+        # history
+        his.append(robot.get_pos())
 
         # Generate N inputs
         inputs = generate_n_inputs(robot)
@@ -111,10 +121,10 @@ def mpc_loop(robot):
         robot.move_me(inputs[0])
 
         # Visualize the difference
-        vis_grid(robot, cnt)
+        vis_grid(robot, cnt, his)
         cnt = cnt + 1
 
-        print(robot.get_pos())
+        #print(robot.get_pos())
 
         # time tick
         time.sleep(0.5)
