@@ -50,7 +50,7 @@ def generate_n_inputs(robot):
         cost += cp.sum_squares(x[:,t+1] - [goal[0], goal[1]]) # +  cp.sum_squares(u[:,t])
         constr += [x[:,t+1] == A@x[:,t] + B@u[:,t], v[:,t+1] == u[:,t], cp.norm(u[:,t], 'inf') <= NORM_MAX]
         for j in range(len(obs)):
-            constr += [cp.norm(x[:t + 1]  - obs[j])]
+            constr += [cp.norm(x[:t + 1]  - [obs[j][0], obj[j][1]] >= 10)]
 
     # sums problem objectives and concatenates constraints.
     constr += [x[:,0] == robot.get_pos()]
