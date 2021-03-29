@@ -48,9 +48,9 @@ def generate_n_inputs(robot):
     constr = []
     for t in range(T):
         cost += cp.sum_squares(x[:,t+1] - [goal[0], goal[1]]) # +  cp.sum_squares(u[:,t])
-        constr += [x[:,t+1] == A@x[:,t] + B@u[:,t], v[:,t+1] == u[:,t], cp.norm(u[:,t], 'inf') <= NORM_MAX]
-        for j in range(len(obs)):
-            constr += [cp.norm(x[:t + 1]  - [obs[j][0], obj[j][1]] >= 10)]
+        constr += [x[:,t+1] == A@x[:,t] + B@u[:,t], v[:,t+1] == u[:,t], cp.norm(u[:,t], 'inf') <= NORM_MAX]#, cp.norm(x[:t + 1] - [10,10]) >= 1]
+#        for j in range(len(obs)):
+#            constr += [cp.norm(x[:,t + 1]  - [obs[j][0], obs[j][1]]) >= 10]
 
     # sums problem objectives and concatenates constraints.
     constr += [x[:,0] == robot.get_pos()]
@@ -79,15 +79,20 @@ def vis_grid(robot, cnt, his):
     # (or if you have an existing figure)
     # fig = plt.gcf()
     # ax = fig.gca()
+    '''
     for i in range(len(obs)):
         circs = plt.Circle((obs[i][0],obs[i][1]), r[i], color='red')
         ax.add_patch( circs )
+    '''
 
     for i in range(len(his) - 1):
         print("AAA")
         print(his[i])
         print(his[i + 1])
-        ax.plot([his[i][0], his[i][1]], [his[i + 1][0], his[i + 1][1]],'go--', linewidth=2, markersize=12)
+        aaa = [49.99999583520783, 49.99999583520591]
+        bbb = [59.999995764844236, 59.999995764842325]
+        plt.plot(aaa, bbb, 'b-', linewidth=2, markersize=12)
+        plt.plot([his[i][0], his[i][1]], [his[i + 1][0], his[i + 1][1]],'b-', linewidth=2, markersize=12)
 
     plt.xlim([0, w])
     plt.ylim([0, h])
