@@ -1,0 +1,28 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+robot = [0,0]
+
+goal = [20,20]
+
+obs_init = [[5,0], [0,5], [4,0], [0,7], [7,0],[10,10]]
+obs_vel = [[-1,1],[1,-1], [-1,0], [0,-1], [-1,0], [-1,-1]]
+r_obs = [1,2,1,1,1,0.5]
+
+# You probably won't need this if you're embedding things in a tkinter plot...
+plt.ion()
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+line1, = ax.plot(x, y, 'r-') # Returns a tuple of line objects, thus the comma
+ax.plot(goal,'o')
+
+for i in range(0,100):
+	for j in range(len(obs_init)):
+		circle1 = plt.Circle((obs_init[j][0], obs_init[j][1]), r_obs[j], color='r')
+		ax.add_patch(circle1)
+		obj_init[j][0] += obs_vel[j][0]
+		obj_init[j][1] += obs_vel[j][1]
+	fig.canvas.draw()
+	plt.show()
+	fig.canvas.flush_events()
