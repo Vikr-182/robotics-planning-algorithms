@@ -9,7 +9,7 @@ r_robot = 0.1
 goal = [20,10]
 
 obs_init = [[6,0], [0,6], [4,0],[2,1]]#, [25,]]#, [0,7], [7,0],[10,10]]
-obs_vel = [[-0.1,.1],[.24,0], [-.1,0],[0,-.1]]#, [0,-1], [-1,0], [-1,-1]]
+obs_vel = [[-0.3,.3],[.3,0], [-.3,0],[0,-.3]]#, [0,-1], [-1,0], [-1,-1]]
 r_obs = [0.2,0.2,0.2,.2]#,0.1,0.1,0.2]
 
 # You probably won't need this if you're embedding things in a tkinter plot...
@@ -33,12 +33,14 @@ def norm(arr1):
 def compute_vel(obs_init, r_obs):
 	vel = [0,0]
 	maxi = 1e11
-	for ii in range(- 10, + 10):
-		for kk in range(- 10, + 10):
+	for ii in range(- 50, + 50):
+		for kk in range(- 50, + 50):
 			i = robot[0] + ii * 0.01
 			k = robot[1] + kk * 0.01
 			# check 
 			rvel = [i,k]
+			#print(rvel[0] - robot[0], rvel[1] - robot[1])
+			#print("BB")
 			flag = 0
 			rvel_ac = [ rvel[0] - robot[0], rvel[1] - robot[1] ]
 			for j in range(len(obs_init)):
@@ -70,6 +72,37 @@ def compute_vel(obs_init, r_obs):
 	print(robot)
 	return vel
 
+def plot_collision(robot, obs_init):
+	vel = [0,0]
+	maxi = 1e11
+	for ii in range(1):
+		for kk in range(1):
+			for j in range(len(obs_init)):
+				# check if in collision cone for next 1s
+				vel_ac = [ rvel[0] - robot[0] - obs_vel[j][0], rvel[1] - robot[1] - obs_vel[j][1]]
+				pij = [obs_init[j][0] - robot[0], obs_init[j][1] - robot[1]]
+#				print(rvel,robot,obs_vel[j])
+#				print(norm(vel_ac))
+				ctheta = dot(vel_ac, pij)/(norm(pij) * norm(vel_ac))
+#				print(ctheta)
+				theta = np.arccos([ctheta])[0]
+				stheta = (r_robot + r_obs[j])/(distance(obs_init[j], robot))
+				theta0 = np.arcsin([stheta])[0]
+				if abs(theta) < abs(theta0):
+#					print(theta)
+#					print(theta0)
+#					print()
+					flag = 1
+	
+def check_collision(robot, obs_init):
+	print(robot)
+	print(obs_init)
+	for i in obs_init:
+		if abs(robot[0] - i[0]) <= 0.1 and abs(robot[1] - i[1]) <= 0.1:
+			print("COLLISION")
+			return 1
+	return 0
+
 for i in range(10000):
 	if distance(robot, goal) < 1:
 		print(distance(robot, goal))
@@ -100,7 +133,11 @@ for i in range(10000):
 	temp = [robot[0], robot[1]]
 	robot[0] += robot_vel[0]
 	robot[1] += robot_vel[1]
-	ax.plot([temp[0], robot[0]], [temp[0], temp[1]])
+
+	check_collision(robot, obs_init)
+	#plot_collision(robot, obs_init)
+
+	#ax.plot([temp[0], robot[0]], [temp[0], temp[1]])
 	fig.canvas.draw()
 	plt.show()
 	plt.savefig(str(i) + '.png')
